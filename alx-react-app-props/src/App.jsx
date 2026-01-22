@@ -4,8 +4,8 @@ import MainContent from './components/MainContent';
 import Footer from './components/Footer';
 import UserProfile from './components/UserProfile';
 import { useState } from 'react'
-import ProfilePage from './ProfilePage';
-import UserContext from './UserContext';
+import ProfilePage from './components/ProfilePage';
+import UserContext from './components/UserContext';
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
