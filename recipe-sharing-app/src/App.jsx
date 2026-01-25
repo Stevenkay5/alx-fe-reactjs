@@ -8,7 +8,7 @@ function App() {
 
   return (
     <div style={{ maxWidth: '600px', margin: '40px auto', padding: '20px' }}>
-      <h1>🍲 Recipe Sharing App</h1>
+      <h1> Recipe Sharing App</h1>
 
       <AddRecipeForm />
       <RecipeList />
