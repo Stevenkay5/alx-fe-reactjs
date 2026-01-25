@@ -1,42 +1,32 @@
-import { useState } from 'react';
-import { useRecipeStore } from '../recipeStore';
+import { create } from 'zustand';
 
-const EditRecipeForm = ({ recipe }) => {
-  const updateRecipe = useRecipeStore((state) => state.updateRecipe);
+export const useRecipeStore = create((set, get) => ({
+  recipes: [],
+  searchTerm: '',
 
-  const [title, setTitle] = useState(recipe.title);
-  const [description, setDescription] = useState(recipe.description);
+  addRecipe: (newRecipe) =>
+    set((state) => ({
+      recipes: [...state.recipes, newRecipe],
+    })),
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  deleteRecipe: (id) =>
+    set((state) => ({
+      recipes: state.recipes.filter((recipe) => recipe.id !== id),
+    })),
 
-    updateRecipe({
-      id: recipe.id,
-      title,
-      description,
-    });
+  updateRecipe: (updatedRecipe) =>
+    set((state) => ({
+      recipes: state.recipes.map((recipe) =>
+        recipe.id === updatedRecipe.id ? updatedRecipe : recipe
+      ),
+    })),
 
-    alert('Recipe updated!');
-  };
+  setSearchTerm: (term) => set({ searchTerm: term }),
 
-  return (
-    <form onSubmit={handleSubmit}>
-      <h3>Edit Recipe</h3>
-
-      <input
-        type="text"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
-
-      <textarea
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-      />
-
-      <button type="submit">Update Recipe</button>
-    </form>
-  );
-};
-
-export default EditRecipeForm;
+  filteredRecipes: () => {
+    const { recipes, searchTerm } = get();
+    return recipes.filter((recipe) =>
+      recipe.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  },
+}));
