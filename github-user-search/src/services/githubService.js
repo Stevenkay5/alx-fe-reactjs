@@ -9,7 +9,24 @@ const githubApi = axios.create({
   },
 });
 
-export const fetchUserData = async (username) => {
-  const response = await githubApi.get(`/users/${username}`);
+export const searchUsers = async ({
+  query,
+  location,
+  minRepos,
+  page = 1,
+}) => {
+  let searchQuery = query;
+
+  if (location) searchQuery += ` location:${location}`;
+  if (minRepos) searchQuery += ` repos:>=${minRepos}`;
+
+  const response = await githubApi.get("/search/users", {
+    params: {
+      q: searchQuery,
+      per_page: 10,
+      page,
+    },
+  });
+
   return response.data;
 };
