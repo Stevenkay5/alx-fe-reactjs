@@ -1,4 +1,3 @@
-// src/pages/QuizPage.jsx
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useQuiz } from '../hooks/useQuiz';
@@ -27,14 +26,12 @@ const QuizPage = ({ config, onComplete, onExit }) => {
     isLastQuestion
   } = useQuiz();
 
-  // Load questions when component mounts with config
   useEffect(() => {
     if (config) {
       loadQuestions(config);
     }
   }, [config]);
 
-  // Handle quiz completion
   useEffect(() => {
     if (quizState === 'completed' && onComplete) {
       onComplete({
@@ -45,12 +42,10 @@ const QuizPage = ({ config, onComplete, onExit }) => {
     }
   }, [quizState, score, totalQuestions, onComplete]);
 
-  // Handle answer selection
   const onAnswerSelect = (answer) => {
     handleAnswer(answer);
   };
 
-  // Loading state
   if (loading) {
     return (
       <div className="quiz-page">

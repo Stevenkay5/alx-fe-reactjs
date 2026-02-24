@@ -1,57 +1,78 @@
-// src/hooks/useQuiz.js
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { triviaAPI } from '../services/triviaApi';
-import { processQuestions, validateQuestions } from '../utils/questionUtils';
+
+const decodeHtml = (html) => {
+  const txt = document.createElement('textarea');
+  txt.innerHTML = html;
+  return txt.value;
+};
+
+const shuffleArray = (array) => {
+  return array.sort(() => Math.random() - 0.5);
+};
+
+const processQuestions = (rawQuestions) => {
+  return rawQuestions.map((q, index) => {
+    const question = decodeHtml(q.question);
+    const correctAnswer = decodeHtml(q.correct_answer);
+    const incorrectAnswers = q.incorrect_answers.map(a => decodeHtml(a));
+    const allAnswers = shuffleArray([correctAnswer, ...incorrectAnswers]);
+
+    return {
+      id: index,
+      question,
+      correctAnswer,
+      incorrectAnswers,
+      allAnswers,
+      category: decodeHtml(q.category),
+      difficulty: q.difficulty
+    };
+  });
+};
 
 export const useQuiz = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [questions, setQuestions] = useState([]);
   const [processedQuestions, setProcessedQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState([]);
   const [score, setScore] = useState(0);
-  const [quizState, setQuizState] = useState('setup'); // setup, active, completed
-  const [quizConfig, setQuizConfig] = useState({
-    amount: 10,
-    category: 9,
-    difficulty: 'easy'
-  });
+  const [quizState, setQuizState] = useState('setup');
 
-  // Load questions from API
-  const loadQuestions = async (config = quizConfig) => {
+  const loadQuestions = async (config) => {
+    if (loading) return false;
+
     setLoading(true);
     setError(null);
     
     try {
+      console.log('Loading questions with config:', config);
+      
       const result = await triviaAPI.fetchQuestions(config);
+      console.log('API Result:', result);
       
       if (!result.success) {
-        setError(result.error);
-        setQuestions([]);
-        setProcessedQuestions([]);
+        setError(result.error || 'Failed to load questions');
         return false;
       }
 
-      // Validate raw questions
-      const validation = validateQuestions(result.questions);
-      if (!validation.valid) {
-        setError(validation.error);
+      if (!result.questions || result.questions.length === 0) {
+        setError('No questions received from API');
         return false;
       }
 
-      // Process questions for use in components
       const processed = processQuestions(result.questions);
+      console.log('Processed questions:', processed);
       
-      setQuestions(result.questions);
       setProcessedQuestions(processed);
       setQuizState('active');
       setCurrentQuestionIndex(0);
       setUserAnswers([]);
       setScore(0);
-      
       return true;
+      
     } catch (err) {
+      console.error('Load questions error:', err);
       setError(err.message || 'Failed to load questions');
       return false;
     } finally {
@@ -59,21 +80,17 @@ export const useQuiz = () => {
     }
   };
 
-  // Handle answer selection
   const handleAnswer = useCallback((answer) => {
-    if (quizState !== 'active') return;
+    if (quizState !== 'active' || !processedQuestions[currentQuestionIndex]) return;
     
     const currentQuestion = processedQuestions[currentQuestionIndex];
     const isCorrect = answer === currentQuestion.correctAnswer;
     
-    // Record answer
     const answerRecord = {
-      questionId: currentQuestion.id,
       question: currentQuestion.question,
       selectedAnswer: answer,
       correctAnswer: currentQuestion.correctAnswer,
-      isCorrect,
-      timestamp: Date.now()
+      isCorrect
     };
     
     setUserAnswers(prev => [...prev, answerRecord]);
@@ -82,7 +99,6 @@ export const useQuiz = () => {
       setScore(prev => prev + 1);
     }
     
-    // Move to next question or complete quiz
     if (currentQuestionIndex + 1 < processedQuestions.length) {
       setCurrentQuestionIndex(prev => prev + 1);
     } else {
@@ -90,23 +106,7 @@ export const useQuiz = () => {
     }
   }, [currentQuestionIndex, processedQuestions, quizState]);
 
-  // Restart quiz with same config
-  const restartQuiz = useCallback(() => {
-    setCurrentQuestionIndex(0);
-    setUserAnswers([]);
-    setScore(0);
-    setQuizState('active');
-  }, []);
-
-  // Start new quiz with different config
-  const startNewQuiz = useCallback((newConfig) => {
-    setQuizConfig(newConfig);
-    loadQuestions(newConfig);
-  }, []);
-
-  // Reset everything
   const resetQuiz = useCallback(() => {
-    setQuestions([]);
     setProcessedQuestions([]);
     setCurrentQuestionIndex(0);
     setUserAnswers([]);
@@ -115,10 +115,8 @@ export const useQuiz = () => {
     setError(null);
   }, []);
 
-  // Get current question
   const currentQuestion = processedQuestions[currentQuestionIndex] || null;
 
-  // Calculate progress
   const progress = {
     current: currentQuestionIndex + 1,
     total: processedQuestions.length,
@@ -128,29 +126,16 @@ export const useQuiz = () => {
   };
 
   return {
-    // State
     loading,
     error,
-    questions,
-    processedQuestions,
     currentQuestion,
-    currentQuestionIndex,
-    userAnswers,
-    score,
-    quizState,
-    quizConfig,
     progress,
-    
-    // Actions
-    loadQuestions,
-    handleAnswer,
-    restartQuiz,
-    startNewQuiz,
-    resetQuiz,
-    
-    // Utilities
+    quizState,
+    score,
+    userAnswers,
     totalQuestions: processedQuestions.length,
-    hasQuestions: processedQuestions.length > 0,
-    isLastQuestion: currentQuestionIndex + 1 === processedQuestions.length
+    handleAnswer,
+    loadQuestions,
+    resetQuiz
   };
 };
