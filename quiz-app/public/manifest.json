@@ -10,6 +10,8 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#007bff",
+  "background_color": "#f8f9fa",
+  "description": "Test your knowledge with fun quizzes",
+  "categories": ["education", "entertainment"]
 }
