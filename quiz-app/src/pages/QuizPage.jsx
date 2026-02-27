@@ -19,28 +19,32 @@ const QuizPage = ({ config, onComplete, onExit }) => {
     progress,
     quizState,
     score,
-    handleAnswer,
-    restartQuiz,
+    userAnswers,
     loadQuestions,
-    totalQuestions,
-    isLastQuestion
+    handleAnswer,
+    resetQuiz,
+    totalQuestions
   } = useQuiz();
 
   useEffect(() => {
     if (config) {
       loadQuestions(config);
     }
-  }, [config]);
+    return () => {
+      resetQuiz();
+    };
+  }, [config, loadQuestions, resetQuiz]); 
 
   useEffect(() => {
     if (quizState === 'completed' && onComplete) {
       onComplete({
         score,
         totalQuestions,
-        percentage: (score / totalQuestions) * 100
+        answers: userAnswers,
+        percentage: totalQuestions > 0 ? (score / totalQuestions) * 100 : 0
       });
     }
-  }, [quizState, score, totalQuestions, onComplete]);
+  }, [quizState, score, totalQuestions, userAnswers, onComplete]);
 
   const onAnswerSelect = (answer) => {
     handleAnswer(answer);
@@ -54,7 +58,6 @@ const QuizPage = ({ config, onComplete, onExit }) => {
     );
   }
 
-  // Error state
   if (error) {
     return (
       <div className="quiz-page">
@@ -71,7 +74,6 @@ const QuizPage = ({ config, onComplete, onExit }) => {
     );
   }
 
-  // No questions state
   if (!currentQuestion && quizState !== 'completed') {
     return (
       <div className="quiz-page">
@@ -88,7 +90,6 @@ const QuizPage = ({ config, onComplete, onExit }) => {
     );
   }
 
-  // Quiz active state
   return (
     <div className="quiz-page">
       <div className="quiz-header">
@@ -102,7 +103,9 @@ const QuizPage = ({ config, onComplete, onExit }) => {
         </Button>
         <div className="quiz-stats">
           <span className="quiz-category">{config?.categoryName || 'Quiz'}</span>
-          <span className="quiz-difficulty">{config?.difficulty}</span>
+          <span className={`quiz-difficulty quiz-difficulty-${config?.difficulty}`}>
+            {config?.difficulty}
+          </span>
         </div>
       </div>
 

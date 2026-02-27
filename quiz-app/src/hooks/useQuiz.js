@@ -1,16 +1,20 @@
+// src/hooks/useQuiz.js
 import { useState, useCallback } from 'react';
 import { triviaAPI } from '../services/triviaApi';
 
+// Simple HTML decoder
 const decodeHtml = (html) => {
   const txt = document.createElement('textarea');
   txt.innerHTML = html;
   return txt.value;
 };
 
+// Simple shuffle function
 const shuffleArray = (array) => {
-  return array.sort(() => Math.random() - 0.5);
+  return [...array].sort(() => Math.random() - 0.5);
 };
 
+// Process questions
 const processQuestions = (rawQuestions) => {
   return rawQuestions.map((q, index) => {
     const question = decodeHtml(q.question);
@@ -22,7 +26,6 @@ const processQuestions = (rawQuestions) => {
       id: index,
       question,
       correctAnswer,
-      incorrectAnswers,
       allAnswers,
       category: decodeHtml(q.category),
       difficulty: q.difficulty
@@ -39,17 +42,14 @@ export const useQuiz = () => {
   const [score, setScore] = useState(0);
   const [quizState, setQuizState] = useState('setup');
 
-  const loadQuestions = async (config) => {
+  const loadQuestions = useCallback(async (config) => {
     if (loading) return false;
-
+    
     setLoading(true);
     setError(null);
     
     try {
-      console.log('Loading questions with config:', config);
-      
       const result = await triviaAPI.fetchQuestions(config);
-      console.log('API Result:', result);
       
       if (!result.success) {
         setError(result.error || 'Failed to load questions');
@@ -62,23 +62,22 @@ export const useQuiz = () => {
       }
 
       const processed = processQuestions(result.questions);
-      console.log('Processed questions:', processed);
       
       setProcessedQuestions(processed);
       setQuizState('active');
       setCurrentQuestionIndex(0);
       setUserAnswers([]);
       setScore(0);
+      
       return true;
       
     } catch (err) {
-      console.error('Load questions error:', err);
       setError(err.message || 'Failed to load questions');
       return false;
     } finally {
       setLoading(false);
     }
-  };
+  }, [loading]);
 
   const handleAnswer = useCallback((answer) => {
     if (quizState !== 'active' || !processedQuestions[currentQuestionIndex]) return;
@@ -134,8 +133,8 @@ export const useQuiz = () => {
     score,
     userAnswers,
     totalQuestions: processedQuestions.length,
-    handleAnswer,
     loadQuestions,
+    handleAnswer,
     resetQuiz
   };
 };
