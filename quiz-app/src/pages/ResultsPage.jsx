@@ -11,7 +11,7 @@ const ResultsPage = ({ score, totalQuestions, answers, onPlayAgain, onNewQuiz })
   const getResultMessage = () => {
     if (percentage >= 80) return 'Excellent! 🌟';
     if (percentage >= 60) return 'Good job! 👍';
-    if (percentage >= 40) return 'Not bad! 💪';
+    if (percentage >= 40) return 'Not bad!';
     return 'Keep practicing! 📚';
   };
 
@@ -25,7 +25,7 @@ const ResultsPage = ({ score, totalQuestions, answers, onPlayAgain, onNewQuiz })
   return (
     <div className="results-page">
       <div className="results-container">
-        <h1 className="results-title">Quiz Complete! 🎉</h1>
+        <h1 className="results-title">Quiz Complete!</h1>
         
         <div className="score-circle" style={{ borderColor: getResultColor() }}>
           <div className="score-number">{score}</div>

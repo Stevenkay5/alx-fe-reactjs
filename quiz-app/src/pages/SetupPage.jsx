@@ -69,7 +69,7 @@ const SetupPage = ({ onStart }) => {
   return (
     <div className="setup-page">
       <div className="setup-container">
-        <h1 className="setup-title">🎯 Quiz Setup</h1>
+        <h1 className="setup-title">Quiz Setup</h1>
         <p className="setup-subtitle">Customize your quiz experience</p>
 
         <form onSubmit={handleSubmit} className="setup-form">
@@ -160,7 +160,7 @@ const SetupPage = ({ onStart }) => {
               size="large"
               fullWidth
             >
-              Start Quiz 🚀
+              Start Quiz 
             </Button>
           </div>
         </form>
