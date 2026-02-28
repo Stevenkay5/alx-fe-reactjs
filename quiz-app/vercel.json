@@ -5,11 +5,16 @@
       "src": "package.json",
       "use": "@vercel/static-build",
       "config": {
-        "buildCommand": "CI=false npm run build"
+        "buildCommand": "CI=false npm run build",
+        "outputDirectory": "build"
       }
     }
   ],
   "routes": [
+    {
+      "src": "/test.html",
+      "dest": "/test.html"
+    },
     {
       "src": "/static/(.*)",
       "dest": "/static/$1"
@@ -19,12 +24,35 @@
       "dest": "/manifest.json"
     },
     {
-      "src": "/(.*\\.(js|css|png|jpg|ico|svg))$",
+      "src": "/favicon.ico",
+      "dest": "/favicon.ico"
+    },
+    {
+      "src": "/asset-manifest.json",
+      "dest": "/asset-manifest.json"
+    },
+    {
+      "src": "/logo192.png",
+      "dest": "/logo192.png"
+    },
+    {
+      "src": "/(.*\\.(js|css|json|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot))$",
       "dest": "/$1"
     },
     {
       "src": "/(.*)",
       "dest": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
     }
   ]
 }
