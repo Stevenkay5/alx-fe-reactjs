@@ -11,8 +11,16 @@
   ],
   "routes": [
     {
+      "src": "/static/(.*)",
+      "dest": "/static/$1"
+    },
+    {
       "src": "/manifest.json",
       "dest": "/manifest.json"
+    },
+    {
+      "src": "/(.*\\.(js|css|png|jpg|ico|svg))$",
+      "dest": "/$1"
     },
     {
       "src": "/(.*)",
