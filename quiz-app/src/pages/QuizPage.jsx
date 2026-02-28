@@ -12,6 +12,7 @@ import {
 import './QuizPage.css';
 
 const QuizPage = ({ config, onComplete, onExit }) => {
+  // First, destructure ALL the values from useQuiz
   const {
     loading,
     error,
@@ -25,17 +26,27 @@ const QuizPage = ({ config, onComplete, onExit }) => {
     resetQuiz,
     totalQuestions
   } = useQuiz();
+  
+  console.log('QuizPage rendered with config:', config);
+  console.log('QuizPage state - loading:', loading);
+  console.log('QuizPage state - quizState:', quizState);
+  console.log('QuizPage state - currentQuestion:', currentQuestion);
+  console.log('QuizPage state - totalQuestions:', totalQuestions);
 
   useEffect(() => {
+    console.log('useEffect triggered with config:', config);
     if (config) {
+      console.log('Calling loadQuestions with config');
       loadQuestions(config);
     }
     return () => {
+      console.log('Cleanup - resetting quiz');
       resetQuiz();
     };
-  }, [config, loadQuestions, resetQuiz]); 
+  }, [config]); 
 
   useEffect(() => {
+    console.log('Quiz state changed:', quizState, 'Score:', score);
     if (quizState === 'completed' && onComplete) {
       onComplete({
         score,
@@ -47,10 +58,13 @@ const QuizPage = ({ config, onComplete, onExit }) => {
   }, [quizState, score, totalQuestions, userAnswers, onComplete]);
 
   const onAnswerSelect = (answer) => {
+    console.log('Answer selected:', answer);
     handleAnswer(answer);
   };
 
+  // Show loading spinner
   if (loading) {
+    console.log('Rendering loading spinner');
     return (
       <div className="quiz-page">
         <LoadingSpinner message="Fetching your quiz questions..." />
@@ -59,6 +73,7 @@ const QuizPage = ({ config, onComplete, onExit }) => {
   }
 
   if (error) {
+    console.log('Rendering error:', error);
     return (
       <div className="quiz-page">
         <ErrorMessage 
@@ -75,6 +90,7 @@ const QuizPage = ({ config, onComplete, onExit }) => {
   }
 
   if (!currentQuestion && quizState !== 'completed') {
+    console.log('No current question, quizState:', quizState);
     return (
       <div className="quiz-page">
         <ErrorMessage 
@@ -90,6 +106,7 @@ const QuizPage = ({ config, onComplete, onExit }) => {
     );
   }
 
+  console.log('Rendering quiz content');
   return (
     <div className="quiz-page">
       <div className="quiz-header">

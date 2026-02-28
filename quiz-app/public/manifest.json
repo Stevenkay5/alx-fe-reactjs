@@ -1,6 +1,6 @@
 {
+  "name":"React Quiz Application",
   "short_name": "Quiz App",
-  "name": "React Quiz Application",
   "icons": [
     {
       "src": "/favicon.ico",

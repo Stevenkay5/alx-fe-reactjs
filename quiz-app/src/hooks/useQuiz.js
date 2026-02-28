@@ -1,20 +1,16 @@
-// src/hooks/useQuiz.js
 import { useState, useCallback } from 'react';
 import { triviaAPI } from '../services/triviaApi';
 
-// Simple HTML decoder
 const decodeHtml = (html) => {
   const txt = document.createElement('textarea');
   txt.innerHTML = html;
   return txt.value;
 };
 
-// Simple shuffle function
 const shuffleArray = (array) => {
   return [...array].sort(() => Math.random() - 0.5);
 };
 
-// Process questions
 const processQuestions = (rawQuestions) => {
   return rawQuestions.map((q, index) => {
     const question = decodeHtml(q.question);
@@ -34,7 +30,7 @@ const processQuestions = (rawQuestions) => {
 };
 
 export const useQuiz = () => {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [processedQuestions, setProcessedQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -43,24 +39,30 @@ export const useQuiz = () => {
   const [quizState, setQuizState] = useState('setup');
 
   const loadQuestions = useCallback(async (config) => {
-    if (loading) return false;
+    console.log('loadQuestions called with config:', config);
+    console.log('current loading state:', loading);
     
     setLoading(true);
     setError(null);
-    
+
     try {
+      console.log('Fetching questions from API...');
       const result = await triviaAPI.fetchQuestions(config);
-      
+      console.log('API result:', result);
+
       if (!result.success) {
+        console.log('API returned error:', result.error);
         setError(result.error || 'Failed to load questions');
         return false;
       }
 
       if (!result.questions || result.questions.length === 0) {
+        console.log('No questions received');
         setError('No questions received from API');
         return false;
       }
 
+      console.log('Processing questions:', result.questions.length);
       const processed = processQuestions(result.questions);
       
       setProcessedQuestions(processed);
@@ -68,16 +70,19 @@ export const useQuiz = () => {
       setCurrentQuestionIndex(0);
       setUserAnswers([]);
       setScore(0);
+      console.log('State updated, quiz should show now');
       
       return true;
       
     } catch (err) {
+      console.log('Caught error:', err);
       setError(err.message || 'Failed to load questions');
       return false;
     } finally {
+      console.log('Setting loading to false');
       setLoading(false);
     }
-  }, [loading]);
+  }, []);
 
   const handleAnswer = useCallback((answer) => {
     if (quizState !== 'active' || !processedQuestions[currentQuestionIndex]) return;
